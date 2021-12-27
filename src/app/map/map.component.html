@@ -1,22 +1,20 @@
-<div class="address-lookup">
-  <input type="text" placeholder="Search..." (keyup)="addressLookup($event.target.value)"
-    (click)="$event.stopPropagation()" />
-</div>
-<div>
-  <ul>
-    <li *ngFor="let validationError of searchResults">{{ validationError.display_name }}</li>
-  </ul>
-</div>
-
 <div id="map-point-form">
   <h3>Form</h3>
-  <div><label for="name">Name: </label>
-    <input type="text" id="name" name="name" [(ngModel)]="mapPoint.name" />
-  </div>
-  <div><label for="longitude">Longitude: </label>
-    <input type="text" id="longitude" name="longitude" disabled="true" [ngModel]="mapPoint.longitude" />
-  </div>
-  <div><label for="latitude">Latitude: </label>
-    <input type="text" id="latitude" name="latitude" disabled="true" [ngModel]="mapPoint.latitude" />
+  <form [formGroup]="reverseGeocodeForm">
+    <div><label for="name">Name: </label>
+      <input type="text" id="name" formControlName="name" />
+    </div>
+    <div><label for="longitude">Longitude: </label>
+      <input type="text" id="longitude" formControlName="longitude" />
+    </div>
+    <div><label for="latitude">Latitude: </label>
+      <input type="text" id="latitude" formControlName="latitude" (keyup)="addressLookup()"
+        (click)="$event.stopPropagation()" />
+    </div>
+  </form>
+  <div>
+    <ul>
+      <li *ngFor="let searchResult of searchResults">{{ searchResult.display_name }}</li>
+    </ul>
   </div>
 </div>
