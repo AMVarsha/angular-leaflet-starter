@@ -1,15 +1,22 @@
-<div>
-  <div id="map"
-       leaflet
-       (leafletMapReady)="initializeMap($event)"
-       [leafletOptions]="options"
-       (leafletClick)="onMapClick($event)">
-    <div class="leaflet-bottom leaflet-left">
-      <app-geocoding (onSearch)="refreshSearchList($event)"></app-geocoding>
-    </div>
-  </div>
+<div class="address-lookup">
+  <input type="text" placeholder="Search..." (keyup)="addressLookup($event.target.value)"
+    (click)="$event.stopPropagation()" />
 </div>
-<div id="details-panel">
-  <app-results-list [results]="results" (locationSelected)="getAddress($event)"></app-results-list>
-  <app-map-point-form [mapPoint]="mapPoint"></app-map-point-form>
+<div>
+  <ul>
+    <li *ngFor="let validationError of searchResults">{{ validationError.display_name }}</li>
+  </ul>
+</div>
+
+<div id="map-point-form">
+  <h3>Form</h3>
+  <div><label for="name">Name: </label>
+    <input type="text" id="name" name="name" [(ngModel)]="mapPoint.name" />
+  </div>
+  <div><label for="longitude">Longitude: </label>
+    <input type="text" id="longitude" name="longitude" disabled="true" [ngModel]="mapPoint.longitude" />
+  </div>
+  <div><label for="latitude">Latitude: </label>
+    <input type="text" id="latitude" name="latitude" disabled="true" [ngModel]="mapPoint.latitude" />
+  </div>
 </div>

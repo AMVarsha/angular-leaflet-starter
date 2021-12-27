@@ -1,8 +1,5 @@
-export class NominatimResponse {
-  constructor (
-    public latitude: number,
-    public longitude: number,
-    public displayName: string
-  ) {
-  }
+export interface NominatimResponse {
+    lat: number;
+    lon: number;
+    display_name: string;
 }

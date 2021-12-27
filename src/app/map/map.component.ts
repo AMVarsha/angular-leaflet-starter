@@ -1,8 +1,10 @@
-import {Component, OnInit} from '@angular/core';
-import {icon, latLng, LeafletMouseEvent, Map, MapOptions, marker, tileLayer} from 'leaflet';
-import {DEFAULT_LATITUDE, DEFAULT_LONGITUDE} from '../app.constants';
-import {MapPoint} from '../shared/models/map-point.model';
-import {NominatimResponse} from '../shared/models/nominatim-response.model';
+import { Component, OnInit, Output } from '@angular/core';
+import { icon, latLng, LeafletMouseEvent, Map, MapOptions, marker, tileLayer } from 'leaflet';
+import { EventEmitter } from 'protractor';
+import { DEFAULT_LATITUDE, DEFAULT_LONGITUDE } from '../app.constants';
+import { NominatimService } from '../services/nominatim-service';
+import { MapPoint } from '../shared/models/map-point.model';
+import { NominatimResponse } from '../shared/models/nominatim-response.model';
 
 @Component({
   selector: 'app-map',
@@ -10,52 +12,55 @@ import {NominatimResponse} from '../shared/models/nominatim-response.model';
   styleUrls: ['./map.component.scss']
 })
 export class MapComponent implements OnInit {
-
   map: Map;
   mapPoint: MapPoint;
   options: MapOptions;
   lastLayer: any;
+  searchResults: NominatimResponse[];
+  validationErrors: any;
 
   results: NominatimResponse[];
 
-  constructor () {
+  constructor(private nominatimService: NominatimService) {
   }
 
-  ngOnInit () {
+
+
+  ngOnInit() {
     this.initializeDefaultMapPoint();
     this.initializeMapOptions();
   }
 
-  initializeMap (map: Map) {
+  initializeMap(map: Map) {
     this.map = map;
     this.createMarker();
   }
 
-  getAddress (result: NominatimResponse) {
-    this.updateMapPoint(result.latitude, result.longitude, result.displayName);
+  getAddress(result: NominatimResponse) {
+    this.updateMapPoint(result.lat, result.lon, result.display_name);
     this.createMarker();
   }
 
-  refreshSearchList (results: NominatimResponse[]) {
+  refreshSearchList(results: NominatimResponse[]) {
     this.results = results;
   }
 
-  onMapClick (e: LeafletMouseEvent) {
+  onMapClick(e: LeafletMouseEvent) {
     this.clearMap();
     this.updateMapPoint(e.latlng.lat, e.latlng.lng);
     this.createMarker();
   }
 
-  private initializeMapOptions () {
+  private initializeMapOptions() {
     this.options = {
       zoom: 12,
       layers: [
-        tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 18, attribution: 'OSM'})
+        tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: 'OSM' })
       ]
     }
   }
 
-  private initializeDefaultMapPoint () {
+  private initializeDefaultMapPoint() {
     this.mapPoint = {
       name: 'Hello',
       latitude: DEFAULT_LATITUDE,
@@ -63,7 +68,7 @@ export class MapComponent implements OnInit {
     };
   }
 
-  private updateMapPoint (latitude: number, longitude: number, name?: string) {
+  private updateMapPoint(latitude: number, longitude: number, name?: string) {
     this.mapPoint = {
       latitude: latitude,
       longitude: longitude,
@@ -71,7 +76,7 @@ export class MapComponent implements OnInit {
     };
   }
 
-  private createMarker () {
+  private createMarker() {
     this.clearMap();
     const mapIcon = this.getDefaultIcon();
     const coordinates = latLng([this.mapPoint.latitude, this.mapPoint.longitude]);
@@ -79,7 +84,7 @@ export class MapComponent implements OnInit {
     this.map.setView(coordinates, this.map.getZoom());
   }
 
-  private getDefaultIcon () {
+  private getDefaultIcon() {
     return icon({
       iconSize: [25, 41],
       iconAnchor: [13, 41],
@@ -87,8 +92,27 @@ export class MapComponent implements OnInit {
     });
   }
 
-  private clearMap () {
+  private clearMap() {
     if (this.map.hasLayer(this.lastLayer)) this.map.removeLayer(this.lastLayer);
+  }
+
+  addressLookup(address: string) {
+    if (address.length > 3) {
+      this.nominatimService.addressLookup(address).subscribe((results: NominatimResponse) => {
+        this.searchResults = [{
+          lat: results[0].lat,
+          lon: results[0].lon,
+          display_name: results[0].display_name
+        }]
+        console.log(this.searchResults[0]);
+        
+      });
+    } else {
+      this.searchResults = [];
+    }
+
+
+    // this.validationErrors = this.searchResults[0];
   }
 
 }
